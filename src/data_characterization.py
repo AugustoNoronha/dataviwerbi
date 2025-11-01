@@ -3,7 +3,15 @@ import pandas as pd
 from pathlib import Path
 from utils import load_dataset
 
-plt.rcParams["font.size"] = 11
+# Configurações globais de estilo
+plt.rcParams.update({
+    "font.size": 11,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.grid": True,
+    "grid.alpha": 0.3,
+    "grid.linestyle": "--"
+})
 
 def characterize(csv_path: str, out_dir: str):
     out = Path(out_dir)
@@ -13,50 +21,54 @@ def characterize(csv_path: str, out_dir: str):
     def save_fig(name: str):
         plt.tight_layout()
         plt.subplots_adjust(top=0.9, bottom=0.15, left=0.12, right=0.95)
-        plt.grid(alpha=0.3, linestyle="--")
-        plt.savefig(out / name, dpi=180)
+        plt.savefig(out / name, dpi=200, bbox_inches="tight")
         plt.close()
 
     # 1) Linguagens
-    fig, ax = plt.subplots(figsize=(9,6))
-    df["language"].value_counts().sort_values(ascending=False).plot(kind="bar", ax=ax, color="#5B8FF9")
+    fig, ax = plt.subplots(figsize=(9, 6))
+    df["language"].value_counts().sort_values(ascending=False).plot(
+        kind="bar", ax=ax, color="#5B8FF9", edgecolor="white", width=0.8
+    )
     ax.set_title("Distribuição de Repositórios por Linguagem")
     ax.set_xlabel("Linguagem")
     ax.set_ylabel("Quantidade")
+    plt.xticks(rotation=30, ha="right")
     save_fig("caracterizacao_linguagens.png")
 
-    # 2) Stars
-    fig, ax = plt.subplots(figsize=(9,6))
-    df["stars"].plot(kind="hist", bins=10, color="#FF9F6E", ax=ax)
+    # 2) Stars (Histograma)
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.hist(df["stars"].dropna(), bins=15, color="#FF9F6E",
+            edgecolor="white", alpha=0.8, rwidth=0.9)
     ax.set_title("Distribuição de Stars")
     ax.set_xlabel("Stars")
     ax.set_ylabel("Frequência")
     save_fig("caracterizacao_stars_hist.png")
 
-    # 3) Forks vs Stars
-    fig, ax = plt.subplots(figsize=(9,6))
-    df.plot(kind="scatter", x="stars", y="forks", ax=ax, color="#5AD8A6", alpha=0.7)
+    # 3) Forks vs Stars (Dispersão)
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.scatter(df["stars"], df["forks"], color="#5AD8A6", alpha=0.7, edgecolors="none")
     ax.set_title("Relação Stars × Forks")
     ax.set_xlabel("Stars")
     ax.set_ylabel("Forks")
     save_fig("caracterizacao_stars_vs_forks.png")
 
-    # 4) Idade dos Repositórios
-    fig, ax = plt.subplots(figsize=(9,6))
-    df["age_years"].plot(kind="hist", bins=10, color="#9270CA", ax=ax)
+    # 4) Idade dos Repositórios (Histograma)
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.hist(df["age_years"].dropna(), bins=10, color="#9270CA",
+            edgecolor="white", alpha=0.8, rwidth=0.9)
     ax.set_title("Distribuição da Idade dos Repositórios (anos)")
     ax.set_xlabel("Idade (anos)")
     ax.set_ylabel("Frequência")
     save_fig("caracterizacao_idade_hist.png")
 
-    # 5) Dias desde último commit
-    fig, ax = plt.subplots(figsize=(9,6))
-    df["days_since_last_commit"].plot(kind="hist", bins=10, color="#F6BD16", ax=ax)
+    # 5) Dias desde o Último Commit (Histograma)
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.hist(df["days_since_last_commit"].dropna(), bins=10, color="#F6BD16",
+            edgecolor="white", alpha=0.8, rwidth=0.9)
     ax.set_title("Dias Desde o Último Commit")
     ax.set_xlabel("Dias")
     ax.set_ylabel("Frequência")
     save_fig("caracterizacao_dias_ultimo_commit.png")
-
 
 if __name__ == "__main__":
     import argparse
