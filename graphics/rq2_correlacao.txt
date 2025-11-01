@@ -1,0 +1,1 @@
+Correlação de Pearson (commits_last_90d vs stars): 0.385
